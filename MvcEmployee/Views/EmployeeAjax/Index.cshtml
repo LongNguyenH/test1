@@ -1,0 +1,206 @@
+@model IEnumerable<MvcEmployee.Models.Employee>
+
+@{
+    ViewData["Title"] = "EmployeeAjax Page";
+}
+@section Scripts{
+    <script>
+        $(document).ready(function() {
+            // GET BY ID
+            $(".btn-get-Employee").on("click", function() {
+                var formData = new FormData();
+                var Employeeid = $(this).attr("data-Employeeid");
+                console.log(Employeeid);
+                var url = '@Url.Action("GetDetailsById", "EmployeeAjax")' + '/' + Employeeid;
+                console.log(url);
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.responseCode == 0) {
+                            var Employee = JSON.parse(response.responseMessage);
+                            $("#Position").val(Employee.Position);
+                            $("#Name").val(Employee.Name);
+                            $("#Salary").val(Employee.Salary);
+                            $("#DateofBirth").val(Employee.DateofBirth.split('T')[0]);
+                            $("#hdn-Employee-id").val(Employeeid);
+
+                        }
+                        else {
+                            console.log(response.ResponseMessage);
+                        }
+                    },
+                    error: errorCallback
+                });
+            });
+            //SAVE
+            $("#btn-insert-Employee").on("click", function() {
+                var formData = new FormData();
+                formData.append("Name", $("#Name").val());
+                formData.append("Position", $("#Position").val());
+                formData.append("DateofBirth", $("#DateofBirth").val());
+                formData.append("Salary", $("#Salary").val());
+                console.log(formData);
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("InsertEmployee", "EmployeeAjax")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            // UPDATE
+            $("#btn-update-Employee").on("click", function() {
+                var formData = new FormData();
+                formData.append("id", $("#hdn-Employee-id").val());
+                formData.append("Name", $("#Name").val());
+                formData.append("Position", $("#Position").val());
+                formData.append("DateofBirth", $("#DateofBirth").val());
+                formData.append("Salary", $("#Salary").val());
+                console.log(formData);
+                $.ajax({
+                    type: 'PUT',
+                    url: '@Url.Action("UpdateEmployee", "EmployeeAjax")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            //DELETE
+            $("#btn-delete-Employee").on("click", function() {
+                var formData = new FormData();
+                formData.append("id", $("#hdn-Employee-id").val());
+                $.ajax({
+                    type: 'DELETE',
+                    url: '@Url.Action("DeleteEmployee", "EmployeeAjax")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            function resetForm() {
+                $("#hdn-Employee-id").val("");
+                $("#name").val("");
+                $("#Position").val("");
+            }
+            function errorCallback() {
+                console.log("Something went wrong please contact admin.");
+            }
+            function successCallback(response) {
+                if (response.responseCode == 0) {
+                    resetForm();
+                    console.log(response.responseMessage, function() {
+
+                        //PERFORM REMAINING LOGIC
+                    });
+                }
+                else {
+                    console.log(response.ResponseMessage);
+                }
+            };
+        });
+    </script>
+}
+    <div class="text-center">
+        <h1 class="display-4">Welcome To ASP.NET CORE AJAX Demo</h1>
+        <hr />
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <form>
+                <input type="hidden" id="hdn-Employee-id" />
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label for="Name" class="form-label">Tên</label>
+                        <input class="form-control" type="text" data-val="true" data-val-length="The field Tên must be a string with a minimum length of 3 and a maximum length of 60." data-val-length-max="60" data-val-length-min="3" data-val-required="The Tên field is required." id="Name" maxlength="60" name="Name" value="">
+                        <div class="invalid-feedback">
+                            Name is required.
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="DateofBirth" class="form-label">Ngày sinh </label>
+                        <input class="form-control" type="date" data-val="true" data-val-required="The Ngày sinh field is required." id="DateofBirth" name="DateofBirth" value=""><input name="__Invariant" type="hidden" value="DateofBirth">
+                        <span class="text-danger field-validation-valid" data-valmsg-for="DateofBirth" data-valmsg-replace="true"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="Position" class="form-label">Chức vụ</label>
+                        <input class="form-control" type="text" data-val="true" data-val-length="The field Chức vụ must be a string with a maximum length of 30." data-val-length-max="30" data-val-regex="The field Chức vụ must match the regular expression '^[A-Z]+[a-zA-Z\s]*$'." data-val-regex-pattern="^[A-Z]+[a-zA-Z\s]*$" data-val-required="The Chức vụ field is required." id="Position" maxlength="30" name="Position" value="">
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="Salary" class="form-label">Lương</label>
+                        <input class="form-control" type="text" data-val="true" data-val-number="The field Lương must be a number." data-val-range="The field Lương must be between 1 and 100." data-val-range-max="100" data-val-range-min="1" data-val-required="The Lương field is required." id="Salary" name="Salary" value="">
+                    </div>
+
+                </div>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td>  <a href="javascript:void(0)" class="btn btn-primary" id="btn-insert-Employee">Save Employee</a></td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn btn-info" id="btn-update-Employee">Update Employee</a>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn btn-danger" id="btn-delete-Employee">Delete Employee</a>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </form>
+
+        </div>
+        <br />
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Tên</td>
+                        <td>Ngày sinh</td>
+                        <td>Vị trí</td>
+                        <td>Lương</td>
+                        <td>Action</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Id)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DateofBirth)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Position)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Salary)
+                            </td>
+                            <td>
+                                <a href="javascript:void(0)" data-Employeeid="@item.Id" class="btn btn-success btn-get-Employee">Get Employee</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+        </table>
+    </div>
+</div>
